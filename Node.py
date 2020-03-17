@@ -1,5 +1,5 @@
-from envState import Maze
-from envState import Cell
+from EnvState import Maze
+from EnvState import Cell
 
 class Node(object):
     '''Initialize an instance of a node with current state, parent node, path_cost and action'''
@@ -9,6 +9,7 @@ class Node(object):
         self.parent = None
         self.path_cost = 0
         self.action = ''
+        self.heuristic = 0
     def getState(self):
         return self.state
     def getParentNode(self):
@@ -27,14 +28,10 @@ class Node(object):
         self.state = parent.state.transition(action)
         self.hashed_state = hash(self.state)
         self.path_cost = parent.path_cost + 1
+        self.heuristic = 0
         return self
-
-# filename = 'multiprize-tiny.txt'
-# cell = Cell(Maze(filename))
-# initial_state = cell.initial()
-# initial_node = Node(initial_state)
-# print(initial_node.state.mouse)
-# child_node = initial_node.setChildNode(initial_node, 'South')
-# print(child_node.state.mouse)
-
+    def __le__(self, other):
+        return (self.heuristic <= other.heuristic)
+    def __lt__(self, other):
+        return (self.heuristic < other.heuristic)
 

@@ -1,10 +1,11 @@
 import copy
 import time
-from envState import Maze
-from envState import Cell
+from EnvState import Maze
+from EnvState import Cell
 from Node import Node
+from queue import PriorityQueue
 
-### Adapted from array_stack
+### Adapted from array_stack (CS 256 Data Structures Chapter 6 code)
 '''LIFO queue structure for DFS'''
 class Stack(object):
     def __init__(self):
@@ -31,14 +32,8 @@ class Stack(object):
             states.append(node.state)
         return states
 
-
-# Error: it runs forever
-
 def single_dfs(filename):
     start_time = time.time()
-    # output = copy.deepcopy(filename)
-    # fn = output.replace('prize', 'prize_out')
-    # outfile = open('test.txt','w')
     cell = Cell(Maze(filename)) # Make it clear that this is the initial state
     num_nodes = 0
     start_node = Node(cell.initial()) # This node represents the initial state
@@ -66,8 +61,6 @@ def single_dfs(filename):
             print(child_node, "is our next child node.")
             print(child_node.state.mouse)
             print("Testing:", (child_node.hashed_state not in explored))
-            print(child_node.hashed_state)
-            print(explored)
             if child_node.hashed_state not in explored:
                 if child_node.state.goal_test():
                     print("We have found a goal state!")
@@ -83,7 +76,7 @@ def single_dfs(filename):
                 explored.add(child_node.hashed_state) # For the purposes of A*, we want to not add things to this until they're actually explored
             print(current_node.state.mouse)
 
-print(single_dfs('1prize-large.txt'))
+#print(single_dfs('1prize-large.txt'))
 
 ### Adapted from array_queue (CS 256 Data Structures Chapter 6 code)
 class Queue(object):
@@ -141,13 +134,8 @@ class Queue(object):
             states.append(node.state)
         return states
 
-# Error: it runs in a circle
-
 def single_bfs(filename):
     start_time = time.time()
-    # output = copy.deepcopy(filename)
-    # fn = output.replace('prize', 'prize_out')
-    # outfile = open('test.txt','w')
     cell = Cell(Maze(filename)) # Make it clear that this is the initial state
     num_nodes = 0
     start_node = Node(cell.initial()) # This node represents the initial state
@@ -167,16 +155,11 @@ def single_bfs(filename):
         print("Action_list:", action_list)
         for action in action_list:
             print("Action:", action)
-            # Figure out how to create a new node here, for the child
-            # and then later make current_node that child's parent
-            child_node = Node(current_node)    # Take a look at this line, and make sure that we're making
-            # a new child get enqueued, and not current_node again
+            child_node = Node(current_node)
             child_node = child_node.setChildNode(current_node, action)
             print(child_node, "is our next child node.")
             print(child_node.state.mouse)
             print("Testing:", (child_node.hashed_state not in explored))
-            print(child_node.hashed_state)
-            print(explored)
             if child_node.hashed_state not in explored:
                 if child_node.state.goal_test():
                     print("We have found a goal state!")
@@ -194,4 +177,133 @@ def single_bfs(filename):
             print(current_node.state.mouse)
 
 # print(single_bfs('1prize-large.txt'))
+
+def manhattan(cur_node, filename):
+    cell = Cell(Maze(filename))
+    initial_node = Node(cell.initial())
+    print(cur_node.state.mouse[0], cur_node.state.mouse[1])
+    cur_node.heuristic = abs(cur_node.state.mouse[0] - initial_node.state.prize[0][0]) + abs(cur_node.state.mouse[1] - initial_node.state.prize[0][1])
+    return cur_node.heuristic
+
+'''Error: PriorityQueue does not work for cases where the successor nodes all take the same distance to the goal'''
+
+def single_gbfs(filename):
+    start_time = time.time()
+    cell = Cell(Maze(filename)) # Make it clear that this is the initial state
+    num_nodes = 0
+    start_node = Node(cell.initial()) # This node represents the initial state
+    start_node.heuristic = manhattan(start_node, filename)
+    if start_node.state.goal_test():
+        return -1
+    frontier = PriorityQueue()
+    frontier.put((start_node.heuristic, start_node))
+    explored = set()
+    explored.add(start_node.hashed_state)
+	#print(frontier)
+    while not frontier.empty():
+        current = frontier.get()
+        # print("======== Frontier ITEM", current)
+        current_node = current[1]
+        # print('Current node', current_node)
+        current_node.heuristic = current[0]
+        # print('Current node heuristic', current_node.heuristic)
+        eval_value = current_node.heuristic
+        action_list = current_node.state.actions()
+        # print("Action_list:", action_list)
+        # child_nodes = []
+        for action in action_list:
+            print("Action:", action)
+            child_node = Node(current_node)
+            child_node = child_node.setChildNode(current_node, action)
+            child_node.heuristic = manhattan(child_node, filename)
+            # print("manhattan distance is ", child_node.heuristic)
+            print(child_node, "is our next child node.")
+            # print(child_node.state.mouse)
+            # print("Testing:", (child_node.hashed_state not in explored))
+            if child_node.hashed_state not in explored:
+                if child_node.state.goal_test():
+                    print("We have found a goal state!")
+                    path_cost = child_node.path_cost
+                    num_nodes = len(explored)
+                    print("Path cost: ", path_cost)
+                    print("Number of expanded nodes: ", num_nodes)
+                    end_time = time.time()
+                    return end_time - start_time
+                # eval_value = min(child_node.heuristic, eval_value)
+                # print("Evaluation value is ", eval_value)
+                frontier.put((child_node.heuristic, child_node))
+                # child_nodes.append(child_node)
+            # print(child_nodes)
+            # for child_node in child_nodes:
+            #     if child_node.heuristic == eval_value:
+            #         frontier.put((child_node.heuristic, child_node))
+                # return frontier
+                # print("Frontier", frontier)
+                print("We just enqueued", child_node)
+                explored.add(child_node.hashed_state) # For the purposes of A*, we want to not add things to this until they're actually explored
+            #return frontier
+            print(current_node.state.mouse)
+            # for i in frontier:
+            #     eval_value = min(eval_value, manhattan(i.state, filename))
+            # print(eval_value, i)
+
+
+# print(single_gbfs('1prize-large.txt'))
+def single_astar(filename):
+    start_time = time.time()
+    cell = Cell(Maze(filename)) # Make it clear that this is the initial state
+    num_nodes = 0
+    start_node = Node(cell.initial()) # This node represents the initial state
+    start_node.heuristic = manhattan(start_node, filename) + start_node.path_cost
+    if start_node.state.goal_test():
+        return -1
+    frontier = PriorityQueue()
+    frontier.put((start_node.heuristic, start_node))
+    explored = set()
+    explored.add(start_node.hashed_state)
+    #print(frontier)
+    while not frontier.empty():
+        current = frontier.get()
+        # print("======== Frontier ITEM", current)
+        current_node = current[1]
+        # print('Current node', current_node)
+        current_node.heuristic = current[0]
+        # print('Current node heuristic', current_node.heuristic)
+        eval_value = current_node.heuristic
+        action_list = current_node.state.actions()
+        # print("Action_list:", action_list)
+        # child_nodes = []
+        for action in action_list:
+            print("Action:", action)
+            child_node = Node(current_node)
+            child_node = child_node.setChildNode(current_node, action)
+            child_node.heuristic = manhattan(child_node, filename) + child_node.path_cost
+            # print("manhattan distance is ", child_node.heuristic)
+            print(child_node, "is our next child node.")
+            # print(child_node.state.mouse)
+            # print("Testing:", (child_node.hashed_state not in explored))
+            if child_node.hashed_state not in explored:
+                if child_node.state.goal_test():
+                    print("We have found a goal state!")
+                    path_cost = child_node.path_cost
+                    num_nodes = len(explored)
+                    print("Path cost: ", path_cost)
+                    print("Number of expanded nodes: ", num_nodes)
+                    end_time = time.time()
+                    return end_time - start_time
+                # eval_value = min(child_node.heuristic, eval_value)
+                # print("Evaluation value is ", eval_value)
+                frontier.put((child_node.heuristic, child_node))
+                # child_nodes.append(child_node)
+            # print(child_nodes)
+            # for child_node in child_nodes:
+            #     if child_node.heuristic == eval_value:
+            #         frontier.put((child_node.heuristic, child_node))
+                # return frontier
+                # print("Frontier", frontier)
+                print("We just enqueued", child_node)
+                explored.add(child_node.hashed_state) # For the purposes of A*, we want to not add things to this until they're actually explored
+            #return frontier
+            print(current_node.state.mouse)
+
 

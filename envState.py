@@ -44,22 +44,18 @@ class Cell(object):
     '''goNorth, goSouth, goEast, goWest functions
     return the mouse position when it moves North, South, East, West respectively'''
     def goNorth(self):
-#         if self.getMouseIndex()[1]-1 >= 0:
         if self.mouse[1]-1 >= 0:
             self.mouse = [self.mouse[0], self.mouse[1] - 1]
         return self.mouse
     def goSouth(self):
-#         if self.getMouseIndex()[1]+1 <= len(self.maze.getMaze()):
         if self.mouse[1]+1 <= len(self.maze.getMaze()):
             self.mouse = [self.mouse[0], self.mouse[1] + 1]
         return self.mouse
     def goEast(self):
-#         if self.getMouseIndex()[0]+1 <= len(self.maze.getMaze()[0]):
         if self.mouse[0]+1 <= len(self.maze.getMaze()[0]):
             self.mouse = [self.mouse[0] + 1, self.mouse[1]]
         return self.mouse
     def goWest(self):
-#         if self.getMouseIndex()[0]-1 >= 0:
         if self.mouse[0]-1 >= 0:
             self.mouse = [self.mouse[0] - 1, self.mouse[1]]
         return self.mouse
@@ -74,18 +70,15 @@ class Cell(object):
     '''Compare two states'''
     def __eq__(self, other):
         return (self.mouse == other.mouse) and (self.prize == other.prize)
-        
     '''Possible actions to be taken from a certain state'''
     def actions(self):
         actions = []
         for action in ['North', 'South', 'East', 'West']:
             if not self.__eq__(self.transition(action)):
                 actions.append(action)
-            # self = self.transition(action)
         return actions
     '''Transition function'''
     def transition(self, action):
-        # self = cur
         new = copy.deepcopy(self)
         if action == 'North' and new.maze.getMaze()[new.mouse[1] - 1][new.mouse[0]] != '%':
             new.setMouseIndex(new.goNorth())
@@ -105,15 +98,7 @@ class Cell(object):
             return new
         else:
             return self
-    def move_map(self, action):
-        new = transition(self, action)
-        if self.mouse not in self.prize:
-            if __eq__(self, new):
-                return self
-            else:
-                return new
-        else:
-            return self
+
     '''Goal test function'''
     def goal_test(self):
         if len(self.getPrizeIndex()) != 0:
@@ -122,27 +107,4 @@ class Cell(object):
             return True
         
     def __hash__(self):
-        print('The hash is:')
         return hash(tuple(self.mouse))
-
-# Just a test
-# filename = 'multiprize-tiny.txt'
-# cell = Cell(Maze(filename))
-# initial_state = cell.initial()
-# print(initial_state.mouse)
-# print(initial_state.prize)
-# a = initial_state.transition('South')
-# print(a.mouse)
-# print(a.prize)
-# b = a.transition('North')
-# c = a.transition('East')
-# d = c.transition('East')
-# e = d.transition('East')
-# print(b.mouse)
-# print(b.prize)
-# print(c.mouse)
-# print(c.prize)
-# print(e.mouse)
-# print(e.prize)
-# print(c.actions())
-# print(c.goal_test())
