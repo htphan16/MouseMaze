@@ -7,5 +7,5 @@ from search import *
 def main(filename, search):
 	print(search(filename))
 
-main('1prize-large.txt', single_astar)
+main('multiprize-tiny.txt', single_bfs2)
 

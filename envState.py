@@ -32,6 +32,7 @@ class Cell(object):
         self.mouse = mouse
     '''Remove prize from current prize list if mouse is in the prize cell, return new prize list'''
     def setPrizeIndex(self, prize):
+        self.prize = prize
         if self.mouse in prize:
             prize.remove(self.mouse)
             self.prize = prize
@@ -98,10 +99,9 @@ class Cell(object):
             return new
         else:
             return self
-
     '''Goal test function'''
     def goal_test(self):
-        if len(self.getPrizeIndex()) != 0:
+        if len(self.prize) != 0:
             return False
         else:
             return True
