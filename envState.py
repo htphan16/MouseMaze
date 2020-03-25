@@ -1,4 +1,4 @@
-# Part 1
+### Part 1
 # State representation scheme
 # Transition model
 # Goal test
@@ -36,12 +36,6 @@ class Cell(object):
         if self.mouse in prize:
             prize.remove(self.mouse)
             self.prize = prize
-    '''Get mouse position'''
-    def getMouseIndex(self):
-        return self.mouse
-    '''Get prizes' positions'''
-    def getPrizeIndex(self):
-        return self.prize
     '''goNorth, goSouth, goEast, goWest functions
     return the mouse position when it moves North, South, East, West respectively'''
     def goNorth(self):
@@ -105,6 +99,23 @@ class Cell(object):
             return False
         else:
             return True
-        
+
     def __hash__(self):
         return hash(tuple(self.mouse))
+
+if __name__ == '__main__':
+    filename = 'multiprize-tiny.txt'
+    cell = Cell(Maze(filename))
+    initial_state = cell.initial()
+    print('File is ', filename)
+    print("Initial state's mouse is at", initial_state.mouse)
+    print("Initial state's prize is at", initial_state.prize)
+    state1 = initial_state.transition('South')
+    print("If we go South from initial state, mouse is at", state1.mouse)
+    state2 = state1.transition('South')
+    state3 = state2.transition('East')
+    print("Let's then go South! Our mouse is at", state2.mouse)
+    print("And now prize is at", state2.prize)
+    print("Let's go East now! Our mouse is at", state3.mouse)
+    print("Now we can only move", state3.actions())
+    print("We reached the goal!", state3.goal_test())
